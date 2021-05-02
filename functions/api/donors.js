@@ -1,4 +1,6 @@
 const {db} = require("../utils/admin");
+const functions = require("firebase-functions");
+
 
 const donorCollection = "donor";
 exports.getAllDonors = (request, response) => {
@@ -11,6 +13,9 @@ exports.getAllDonors = (request, response) => {
           todos.push({
             donorId: doc.id,
             email: doc.data().email,
+            bloodType: doc.data().bloodType,
+            zipCode: doc.data().zipCode,
+
           });
         });
         return response.json(todos);
@@ -22,7 +27,7 @@ exports.getAllDonors = (request, response) => {
 };
 
 exports.createDonor = (request, response) => {
-  console.log(typeof(request.body.email));
+  functions.logger.log("Hello here is the body:", request.body);
 
   if (request.body == null) {
     return response.status(400).json({body: "Must not be empty"});
@@ -32,13 +37,20 @@ exports.createDonor = (request, response) => {
     return response.status(400).json({email: "Must not be empty"});
   }
 
-  if (request.body.blood_type == null || request.body.blood_type.trim() === "") {
-    return response.status(400).json({email: "Must not be empty"});
+  if (request.body.bloodType == null ||
+      request.body.bloodType.trim() === "") {
+    return response.status(400).json({bloodType: "Must not be empty"});
+  }
+
+  if (request.body.zipCode == null ||
+        request.body.zipCode.trim() === "") {
+    return response.status(400).json({zipCode: "Must not be empty"});
   }
 
   const newDonor = {
     email: request.body.email,
-    blood_type: request.body.blood_type,
+    bloodType: request.body.bloodType,
+    zipCode: request.body.zipCode,
     createdAt: new Date().toISOString(),
   };
   db
